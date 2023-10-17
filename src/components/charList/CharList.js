@@ -12,34 +12,43 @@ class CharList extends Component {
     charList: [],
     loading: true,
     error: false,
-    newItemLoading: false
+    newItemLoading: false,
+    offset: 213,
+    charEnded: false
   };
 
   marvelService = new MarvelService();
 
   componentDidMount() {
-    this.onRequest()
+    this.onRequest();
   }
 
   onRequest = (offset) => {
-    this.onCharListLoading()
-    this.MarvelService.getAllCharacters(offset)
-        .then(this.onCharListLoaded)
-        .catch(this.onError);
+    this.onCharListLoading();
+    this.marvelService.getAllCharacters(offset)
+      .then(this.onCharListLoaded)
+      .catch(this.onError)
   }
 
   onCharListLoading = () => {
     this.setState({
-      newItemLoading: true
-    })
-  }
-
-  onCharListLoaded = (charList) => {
-    this.setState({
-      charList,
-      loading: false,
-      newItemLoading: false
+      newItemLoading: true,
     });
+  };
+
+  onCharListLoaded = (newCharList) => {
+    let ended = false
+    if (newCharList.length < 9) {
+      ended = true
+    }
+    this.setState(({ offset, charList }) => ({
+      charList: [...charList, ...newCharList],
+      loading: false,
+      newItemLoading: false,
+      offset: offset + 9,
+      charEnded: ended
+
+    }));
   };
 
   onError = () => {
@@ -50,7 +59,7 @@ class CharList extends Component {
   };
 
   render() {
-    const { charList, loading, error } = this.state;
+    const { charList, loading, error, newItemLoading, offset, charEnded } = this.state;
     const errorMessage = error ? <ErrorMessage /> : null;
     const spinner = loading ? <Spinner /> : null;
 
@@ -79,7 +88,12 @@ class CharList extends Component {
             );
           })}
         </ul>
-        <button className="button button__main button__long">
+        <button
+          className="button button__main button__long"
+          disabled={newItemLoading}
+          style={{'display': charEnded ? 'none' : 'block'}}
+          onClick={() => this.onRequest(offset)}
+        >
           <div className="inner">load more</div>
         </button>
       </div>
