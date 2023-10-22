@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import PropTypes from 'prop-types'; 
+import PropTypes from "prop-types";
 import "./charInfo.scss";
 
 import Spinner from "../spinner/Spinner";
@@ -9,56 +9,38 @@ import MarvelService from "../../services/MarvelServies";
 
 const CharInfo = (props) => {
   const [char, setChar] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
 
-
-  const marvelService = new MarvelService();
+  const { loading, error, getCharacter, clearError } = MarvelService();
 
   useEffect(() => {
     updateChar();
   }, [props.charId]);
-
 
   const updateChar = () => {
     const { charId } = props;
     if (!charId) {
       return;
     }
-    onCharLoading();
-    marvelService
-      .getCharacter(charId)
-      .then(onCharLoaded)
-      .catch(onError);
+    clearError();
+    getCharacter(charId).then(onCharLoaded);
   };
   const onCharLoaded = (char) => {
-    setChar(char)
-    setLoading(false)
+    setChar(char);
   };
 
-  const onCharLoading = () => {
-    setLoading(true)
-  };
-
-  const onError = () => {
-    setError(true)
-    setLoading(false)
-  };
-
-    const skeleton = char || loading || error ? null : <Skeleton />;
-    const errorMessage = error ? <ErrorMessage /> : null;
-    const spinner = loading ? <Spinner /> : null;
-    const content = !(loading || error || !char) ? <View char={char} /> : null;
-    return (
-      <div className="char__info">
-        {skeleton}
-        {errorMessage}
-        {spinner}
-        {content}
-      </div>
-    );
-  
-}
+  const skeleton = char || loading || error ? null : <Skeleton />;
+  const errorMessage = error ? <ErrorMessage /> : null;
+  const spinner = loading ? <Spinner /> : null;
+  const content = !(loading || error || !char) ? <View char={char} /> : null;
+  return (
+    <div className="char__info">
+      {skeleton}
+      {errorMessage}
+      {spinner}
+      {content}
+    </div>
+  );
+};
 
 const View = ({ char }) => {
   const { name, description, thumbnail, homepage, wiki, comics } = char;
@@ -103,8 +85,8 @@ const View = ({ char }) => {
   );
 };
 
-CharInfo.propTypes={
-  charId : PropTypes.number
-}
+CharInfo.propTypes = {
+  charId: PropTypes.number,
+};
 
 export default CharInfo;
